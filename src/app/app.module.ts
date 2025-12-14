@@ -4,21 +4,24 @@ import { AppService } from './app.service';
 import { UsersModule } from 'src/users/users.module';
 import { PostsModule } from 'src/posts/posts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/users/user.entity';
+import { TagsModule } from 'src/tags/tags.module';
+import { MetaOptionsModule } from 'src/meta-options/meta-options.module';
 
 @Module({
   imports: [
     UsersModule,
     PostsModule,
+    TagsModule,
+    MetaOptionsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
+      autoLoadEntities: true,
       port: 5432,
       synchronize: true,
       username: 'postgres',
       password: 'Kaizen47$',
       database: 'nestjs_blog',
-      entities: [User],
     }),
   ],
   controllers: [AppController],

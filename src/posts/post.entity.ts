@@ -1,7 +1,17 @@
-import { CreatePostsMetaDataDto } from 'src/posts/dto/create-posts-metadata.dto';
+import { MetaOption } from 'src/meta-options/meta-option.entity';
 import { postStatus } from 'src/posts/enum/postStatus.enum';
 import { postType } from 'src/posts/enum/postType.enum';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Tag } from 'src/tags/tag.entity';
+import { User } from 'src/users/user.entity';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Post {
@@ -41,21 +51,18 @@ export class Post {
   @Column({
     type: 'text',
     nullable: true,
-    length: 1024,
   })
   content?: string;
 
   @Column({
     type: 'text',
     nullable: true,
-    length: 1024,
   })
   schema?: string;
 
   @Column({
     type: 'text',
     nullable: true,
-    length: 1024,
   })
   featuredImageUrl?: string;
 
@@ -65,9 +72,22 @@ export class Post {
   })
   publishedOn: Date;
 
-  @Column()
-  tags?: Array<string>;
+  @ManyToMany(() => Tag)
+  @JoinTable()
+  tags?: Tag[];
 
-  @Column()
-  metaOptions?: Array<CreatePostsMetaDataDto>;
+  /**
+   * related user with user id and declaring it's inverse relationship
+   * many to one
+   */
+  @ManyToOne(() => User, (user) => user.posts)
+  author: User;
+
+  /**
+   * declaring relation type and it's inverse (bi-direction)
+   */
+  @OneToOne(() => MetaOption, (metaOptions) => metaOptions.post, {
+    cascade: true,
+  })
+  metaOptions?: MetaOption | null;
 }

@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUsersDto } from 'src/users/dto/create-users.dto';
 import { GetUsersQueryDto } from 'src/users/dto/get-users-query.dto';
@@ -26,10 +30,28 @@ export class UsersService {
   /**
    * Finds one user from the database with id
    * @param id
-   * @returns string
+   * @returns user
    */
-  findOne(id: number) {
-    return `${id} found`;
+  async findOne(id: number) {
+    const user = await this.userRepository.findOneBy({
+      id,
+    });
+    return user;
+  }
+
+  async findUserPosts(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        posts: true,
+      },
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    return user;
   }
 
   /**
@@ -37,7 +59,16 @@ export class UsersService {
    * @param createUsersDto
    * @returns createUserDto
    */
-  create(createUsersDto: CreateUsersDto) {
-    return createUsersDto;
+  async create(createUsersDto: CreateUsersDto) {
+    const userExists = await this.userRepository.findOneBy({
+      email: createUsersDto.email,
+    });
+
+    if (userExists)
+      throw new ConflictException('User with same email already exists');
+
+    const createdUser = this.userRepository.create(createUsersDto);
+    await this.userRepository.save(createdUser);
+    return createdUser;
   }
 }

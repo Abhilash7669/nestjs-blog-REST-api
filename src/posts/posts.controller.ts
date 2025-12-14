@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
@@ -7,8 +15,12 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { CreatePostsDto } from 'src/posts/dto/create-posts.dto';
+import { DeletePostsParamsDto } from 'src/posts/dto/delete-posts-params.dto';
 import { GetPostsParamsDto } from 'src/posts/dto/get-posts-params.dto';
+import { PatchPostsDto } from 'src/posts/dto/patch-posts.dto';
+import { PatchPostsParamsDto } from 'src/posts/dto/patch-posts.params.dto';
 import { PostsService } from 'src/posts/providers/posts.service';
+import { DeletePostResponse } from 'src/posts/res/delete-post.res';
 
 @Controller('posts')
 export class PostsController {
@@ -68,5 +80,49 @@ export class PostsController {
   @Post()
   create(@Body() createPostsDto: CreatePostsDto) {
     return this.postsService.create(createPostsDto);
+  }
+
+  /**
+   * Updates a post in the database
+   */
+  @ApiOperation({
+    description: 'Updates a post',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Post id passed to route param',
+    required: true,
+  })
+  @Patch('/:id')
+  update(
+    @Body() patchPostsDto: PatchPostsDto,
+    @Param() patchPostsParamsDto: PatchPostsParamsDto,
+  ) {
+    return this.postsService.update(patchPostsDto, patchPostsParamsDto.id);
+  }
+
+  /**
+   * Deletes one post from the database
+   * @param id
+   * @returns Promise<DeletePostResponse>
+   */
+  @ApiOperation({
+    description: 'Deletes one post from the database',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Post id passed to params to be deleted',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    type: Promise<DeletePostResponse>,
+    description: '{deleted: true, id: postId }',
+  })
+  @Delete('/:id')
+  public delete(
+    @Param() deletePostsParamsDto: DeletePostsParamsDto,
+  ): Promise<DeletePostResponse> {
+    return this.postsService.delete(deletePostsParamsDto.id);
   }
 }

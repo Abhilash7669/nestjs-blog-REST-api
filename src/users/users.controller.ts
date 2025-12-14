@@ -48,6 +48,18 @@ export class UsersController {
     return this.usersService.findAll({ limit, page });
   }
 
+  @ApiOperation({
+    description: 'This finds all the posts of a user',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+  })
+  @Get('/posts/:id')
+  findUserPosts(@Param() getUsersParamsDto: GetUsersParamsDto) {
+    return this.usersService.findUserPosts(getUsersParamsDto.id);
+  }
+
   /**
    * Controller to find one user with id from params
    * @param getUsersParamsDto

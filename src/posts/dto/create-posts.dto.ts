@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
+  IsInt,
   IsISO8601,
   IsJSON,
   IsNotEmpty,
@@ -12,11 +13,22 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
-import { CreatePostsMetaDataDto } from 'src/posts/dto/create-posts-metadata.dto';
+import { CreatePostsMetaDataDto } from 'src/meta-options/dto/create-posts-metadata.dto';
 import { postStatus } from 'src/posts/enum/postStatus.enum';
 import { postType } from 'src/posts/enum/postType.enum';
 
 export class CreatePostsDto {
+  @ApiProperty({
+    type: 'integer',
+    name: 'authorId',
+    description: 'Id of Author who created the post',
+    example: 1,
+    required: true,
+  })
+  @IsInt()
+  @IsNotEmpty()
+  authorId: number;
+
   @ApiProperty({
     name: 'title',
     description: 'Title of the post',
@@ -105,39 +117,27 @@ export class CreatePostsDto {
 
   @ApiPropertyOptional({
     name: 'tags',
-    description: 'An array of strings, optional tags for post',
-    example: ['Nestjs', 'Blog with Nestjs'],
+    description: 'Arrat of ids of tags',
+    example: [1],
   })
   @IsArray()
-  @IsString({ each: true })
+  @IsInt({ each: true })
   @IsOptional()
-  tags?: Array<string>;
+  tags?: Array<number>;
 
   @ApiProperty({
-    type: 'array',
-    required: false,
     name: 'metaOptions',
-    example: [{ key: 'value', value: 'Value hjere' }],
-    items: {
-      type: 'object',
-      properties: {
-        key: {
-          type: 'string',
-          description:
-            'The key can be any string identifier for your meta option',
-          example: 'metaTitle',
-        },
-        value: {
-          type: 'any',
-          description: 'value for your key-value pair',
-          example: 'Nestjs',
-        },
+    type: 'object',
+    properties: {
+      metaValue: {
+        type: 'string',
+        description: 'The metaValue is a JSON string',
+        example: '{"sideBarEnabled": true}',
       },
     },
   })
-  @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CreatePostsMetaDataDto)
-  metaOptions?: Array<CreatePostsMetaDataDto>;
+  metaOptions?: CreatePostsMetaDataDto | null;
 }
