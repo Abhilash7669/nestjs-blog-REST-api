@@ -72,7 +72,7 @@ export class Post {
   })
   publishedOn: Date;
 
-  @ManyToMany(() => Tag)
+  @ManyToMany(() => Tag, (tags) => tags.posts)
   @JoinTable()
   tags?: Tag[];
 
